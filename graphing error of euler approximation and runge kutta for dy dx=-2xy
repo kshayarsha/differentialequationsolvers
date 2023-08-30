@@ -1,0 +1,78 @@
+import matplotlib.pyplot as plt
+import math
+import pandas as pd
+
+def equation(x, y):
+    return -2 * x * y
+
+def euler(x0, y0, h, x):
+    x_values = [x0]
+    y_values = [y0]
+
+    while x0 < x:
+        y0 = y0 + h * equation(x0, y0)
+        x0 = round(x0 + h, 4)
+
+        x_values.append(x0)
+        y_values.append(y0)
+
+    return x_values, y_values
+
+def rungekutta(x0, y0, h, x):
+    x_values = [x0]
+    y_values = [y0]
+
+    while x0 < x:
+        k1 = h * equation(x0, y0)
+        k2 = h * equation(x0 + h / 2, y0 + k1 / 2)
+        k3 = h * equation(x0 + h / 2, y0 + k2 / 2)
+        k4 = h * equation(x0 + h, y0 + k3)
+
+        y0 = y0 + (1.0 / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+        x0 = x0 + h
+
+        x_values.append(x0)
+        y_values.append(y0)
+
+    return x_values, y_values
+
+def analytical(x_vals):
+    y_vals = [math.e**(-x ** 2) for x in x_vals]
+    return y_vals
+
+x0 = int(input('enter x value: '))
+y0 = int(input('enter y value: '))
+h = float(input('enter step size: '))
+x = int(input('enter final value: '))
+
+x_vals_euler, y_vals_euler = euler(x0, y0, h, x)
+x_vals_rk, y_vals_rk = rungekutta(x0, y0, h, x)
+x_vals_analytical = [x for x in x_vals_euler]
+y_vals_analytical = analytical(x_vals_analytical)
+
+# Calculate error percentages for Euler and Runge-Kutta methods
+euler_errors = [100 * abs(ya - ye) / ya if ya != 0 else 0 for ya, ye in zip(y_vals_analytical, y_vals_euler)]
+rk_errors = [100 * abs(ya - yr) / ya if ya != 0 else 0 for ya, yr in zip(y_vals_analytical, y_vals_rk)]
+
+# Plotting using Matplotlib
+plt.plot(x_vals_euler, euler_errors, label='Euler Method Error %')
+plt.plot(x_vals_rk, rk_errors, label='Runge-Kutta Method Error %')
+plt.xlabel('x')
+plt.ylabel('Error %')
+plt.title('Error Percentage Comparison: Euler vs. Runge-Kutta')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+diff = {
+    'x values': x_vals_euler,
+    'analytical solution': y_vals_analytical,
+    'runge kutta method': y_vals_rk,
+    'euler approximation': y_vals_euler,
+    'euler error %': euler_errors,
+    'runge kutta error %': rk_errors
+}
+
+df = pd.DataFrame(diff)
+df.to_csv('data1.csv')
+print(df)
