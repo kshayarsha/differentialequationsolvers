@@ -1,0 +1,71 @@
+import matplotlib.pyplot as plt
+import math
+import pandas as pd
+
+def equation(x, y):
+    return -2 * x * y
+
+def euler(x0, y0, h, x):
+    x_values = [x0]
+    y_values = [y0]
+
+    while x0 < x:
+        y0 = y0 + h * equation(x0, y0)
+        x0 = round(x0 + h, 4)  # Round to 4 decimal places directly
+        x_values.append(x0)
+        y_values.append(y0)
+
+    return x_values, y_values
+
+def rungekutta(x0, y0, h, x):
+    x_values = [x0]
+    y_values = [y0]
+
+    while x0 < x:
+        k1 = h * equation(x0, y0)
+        k2 = h * equation(x0 + h / 2, y0 + k1 / 2)
+        k3 = h * equation(x0 + h / 2, y0 + k2 / 2)
+        k4 = h * equation(x0 + h, y0 + k3)
+
+        y0 = y0 + (1.0 / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+        x0 = round(x0 + h, 4)  # Round to 4 decimal places directly
+        x_values.append(x0)
+        y_values.append(y0)
+
+    return x_values, y_values
+
+def analytical(x_vals):
+    y_vals = [math.e**(-x ** 2) for x in x_vals]
+    return y_vals
+
+x0 = float(input('Enter initial x value: '))
+y0 = float(input('Enter initial y value: '))
+h = float(input('Enter step size: '))
+x = float(input('Enter final x value: '))
+
+x_vals_euler, y_vals_euler = euler(x0, y0, h, x)
+x_vals_rk, y_vals_rk = rungekutta(x0, y0, h, x)
+x_vals_analytical = x_vals_euler
+y_vals_analytical = analytical(x_vals_analytical)
+
+# Plotting using Matplotlib
+plt.plot(x_vals_euler, y_vals_euler, label='Euler Method')
+plt.plot(x_vals_rk, y_vals_rk, label='Runge-Kutta Method')
+plt.plot(x_vals_analytical, y_vals_analytical, label='Analytical Solution')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Numerical and Analytical Solutions for dy/dx = -2xy')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+diff = {
+    'x values': x_vals_euler,
+    'analytical solution': y_vals_analytical,
+    'runge kutta method': y_vals_rk,
+    'euler approximation': y_vals_euler
+}
+
+df = pd.DataFrame(diff)
+df.to_csv('data3.csv', index=False)  
+print(df)
