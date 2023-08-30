@@ -1,0 +1,53 @@
+mport numpy as np
+import matplotlib.pyplot as plt
+
+
+def d2ydx2(x, y, dydx):
+    return (dydx - x - y) / 2
+
+
+def secondorder(x0, y0, dydx0, x, h):
+    n = int((x - x0) / h)
+    y = y0
+    dydx = dydx0
+    x_values = [x0]
+    y_values = [y]
+
+    for i in range(1, n + 1):
+        k1 = h * dydx
+        l1 = h * d2ydx2(x0, y, dydx)
+
+        k2 = h * (dydx + 0.5 * l1)
+        l2 = h * d2ydx2(x0 + 0.5 * h, y + 0.5 * k1, dydx + 0.5 * l1)
+
+        k3 = h * (dydx + 0.5 * l2)
+        l3 = h * d2ydx2(x0 + 0.5 * h, y + 0.5 * k2, dydx + 0.5 * l2)
+
+        k4 = h * (dydx + l3)
+        l4 = h * d2ydx2(x0 + h, y + k3, dydx + l3)
+
+        y = y + (1.0 / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+        dydx = dydx + (1.0 / 6.0) * (l1 + 2 * l2 + 2 * l3 + l4)
+        x0 = x0 + h
+
+        x_values.append(x0)
+        y_values.append(y)
+
+    return x_values, y_values
+
+
+x0 = float(input('Enter initial value of x: '))
+y0 = float(input('Enter initial y value: '))
+dydx0 = float(input('Enter initial dy/dx value: '))
+x = float(input('Enter final x value: '))
+h = float(input('Enter step size: '))
+
+x_values, y_values = secondorder(x0, y0, dydx0, x, h)
+
+plt.plot(x_values, y_values, label='Runge-Kutta Solution')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Runge-Kutta Method Solution')
+plt.legend()
+plt.grid(True)
+plt.show()
